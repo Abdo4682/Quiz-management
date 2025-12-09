@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections.Frozen;
 using System.Dynamic;
@@ -19,14 +19,14 @@ namespace project
             }
             return input;
         }
-        class question
+        class Question
         {
             public string Text;
             public string [] Choices;
             public string CorrectChoice;
             public string [] Keywords;
             public string Type;
-            public question(string _Text, string[] _Choices, string _CorrectChoice, string [] _Keywords, string _Type)
+            public Question(string _Text, string[] _Choices, string _CorrectChoice, string [] _Keywords, string _Type)
             {
                 Text = _Text;
                 Choices = _Choices;
@@ -37,7 +37,7 @@ namespace project
         }
         class Quiz
         {
-            public List<question> Questions = new List<question>();
+            public List<Question> Questions = new List<Question>();
             protected string id;
             protected string topic;
             protected string difficultylevel = "Not determined yet";
@@ -56,7 +56,7 @@ namespace project
             {
                 return topic;
             }
-            public virtual string getDifficultyLevel()
+            public virtual string getDifficultyLevel(int avg)
             {
                 return difficultylevel;
             }
@@ -70,7 +70,7 @@ namespace project
         class MultipleChoiceQuiz : Quiz
         {
             public MultipleChoiceQuiz(string _id, string _topic) : base(_id, _topic) {}
-            string [] choices_arr = Array.Empty<string>();
+            public string [] choices_arr = Array.Empty<string>();
             public void addQuestion()
             {
                 Console.Write("Enter question text: ");
@@ -96,16 +96,33 @@ namespace project
                 string correct = Console.ReadLine() ?? "Not provided";
                 correct = Program.checkForNull(correct);
 
-                Questions.Add(new question(questionText, choices_arr, correct, Array.Empty<string>(), "mcq"));  
+                bool exists = false;
+                while (!exists)
+                {
+                    foreach(string choice in choices_arr)
+                    {
+                        if (correct.ToLower() == choice.ToLower())
+                        {
+                            exists = true;
+                        }
+                    }
+                    if (!exists)
+                    {
+                        Console.Write("Correct answer doesn't exist in the choices try again: ");
+                        correct = Console.ReadLine() ?? "Not provided";
+                        correct = Program.checkForNull(correct);
+                    }
+                }
+
+                Questions.Add(new Question(questionText, choices_arr, correct, Array.Empty<string>(), "mcq"));  
             }
-            public override string getDifficultyLevel()
+            public override string getDifficultyLevel(int avg_choices_num)
             {
-                if (choices_arr == null) return "Not determined yet";
-                if (choices_arr.Length > 4)
+                if (avg_choices_num > 4)
                 {
                     return "Hard";
                 }
-                else if(choices_arr.Length == 4)
+                else if(avg_choices_num == 4)
                 {
                     return "Medium";
                 }
@@ -119,7 +136,7 @@ namespace project
         class EssayQuiz : Quiz
         {
             public EssayQuiz(string _id, string _topic) : base(_id, _topic) {}
-            string [] keywords_arr = Array.Empty<string>();
+            public string [] keywords_arr = Array.Empty<string>();
             public void addQuestion()
             {
                 Console.Write("Enter question text: ");
@@ -131,16 +148,15 @@ namespace project
                 keywords_str = Program.checkForNull(keywords_str);
 
                 keywords_arr = keywords_str.Split(",").Select(c => c.Trim()).ToArray();  
-                Questions.Add(new question(questionText, Array.Empty<string>(), string.Empty, keywords_arr, "essay"));            
+                Questions.Add(new Question(questionText, Array.Empty<string>(), string.Empty, keywords_arr, "essay"));            
             }
-            public override string getDifficultyLevel()
+            public override string getDifficultyLevel(int avg_keywords_num)
             {
-                if (keywords_arr == null) return "Not determined yet";
-                if (keywords_arr.Length > 5)
+                if (avg_keywords_num > 5)
                 {
                     return "Hard";
                 }
-                else if (keywords_arr.Length == 5)
+                else if (avg_keywords_num == 5)
                 {
                     return "Medium";
                 }
@@ -176,11 +192,49 @@ namespace project
             }
         }
 
+        class Grade
+        {
+            public string studentName;
+            public string studentID;
+            public string quizTopic;
+            public int mark;
+            public int fullMark;
+            public string getStudentName()
+            {
+                return studentName;
+            }
+            public string getStudentID()
+            {
+                return studentID;
+            }
+            public string getQuizTopic()
+            {
+                return quizTopic;
+            }
+            public int getMark()
+            {
+                return mark;
+            }
+            public int getFullMark()
+            {
+                return fullMark;
+            }
+            public Grade(string _studentID, string _quizTopic, int _mark, int _fullMark, string _studentName)
+            {
+                studentID = _studentID;
+                quizTopic = _quizTopic;
+                mark = _mark;
+                fullMark = _fullMark;
+                studentName = _studentName;
+            }
+        }
+
         class QuizManager
         {
             private List<MultipleChoiceQuiz> McqQuizzes = new List<MultipleChoiceQuiz>();
             private List<EssayQuiz> EssayQuizzes = new List<EssayQuiz>();
             private List<Student> Students = new List<Student>();
+            private List<Grade> Grades = new List<Grade>();
             public void createQuiz()
             {
                 Console.Write("Enter quiz type (Mcq or Essay): ");
@@ -284,7 +338,7 @@ namespace project
                     {
                         if (quiz.getQuizID() == quizID)       
                         {    
-                            foreach (question q in quiz.Questions)
+                            foreach (Question q in quiz.Questions)
                             {                                  
                                 Console.Write($"Enter student's answer for Q{i}: ");
                                 i++;
@@ -296,7 +350,9 @@ namespace project
                                 }
                                 fullmark++;
                             }
+                            Console.WriteLine($"{studentName} scored {mark} out of {fullmark} in {quiz.getTopic()}.");                           
                             Students.Add(new Student(studentID, studentName, mark));
+                            Grades.Add(new Grade(studentID, quiz.getTopic(), mark, fullmark, studentName));
                         }
                     }
                 }
@@ -306,7 +362,7 @@ namespace project
                     {
                         if (quiz.getQuizID() == quizID)
                         {
-                            foreach (question q in quiz.Questions)
+                            foreach (Question q in quiz.Questions)
                             {
                                 Console.Write($"Enter student's answer for Q{i}: ");
                                 i++;
@@ -323,7 +379,9 @@ namespace project
                                     fullmark++;
                                 }
                             }
+                            Console.WriteLine($"{studentName} scored {mark} out of {fullmark} in {quiz.getTopic()}.");
                             Students.Add(new Student(studentID, studentName, mark));
+                            Grades.Add(new Grade(studentID, quiz.getTopic(), mark, fullmark, studentName));
                         }
                     }
                 }
@@ -331,29 +389,47 @@ namespace project
                 {
                     Console.WriteLine("Quiz doesn't have any questions or doesn't exist.");
                 }
-                else
-                {
-                    Console.WriteLine($"{studentName} scored {mark} out of {fullmark} in the test.");
-                }
             }
 
             public void viewQuizzes()
             {
                 foreach(MultipleChoiceQuiz quiz in McqQuizzes)
                 {
-                    Console.WriteLine(quiz.info() + " difficulty level: " + quiz.getDifficultyLevel());
-                }
+                    int sum = 0;
+                    int count = 0;
+                    foreach(Question q in quiz.Questions)
+                    {
+                        sum += q.Choices.Length;
+                        count ++;
+                    }
+                    if (count == 0)
+                    {
+                        count = 1;
+                    }
+                    Console.WriteLine(quiz.info() + ", difficulty level: " + quiz.getDifficultyLevel(sum / count));
+                } 
                 foreach(EssayQuiz quiz in EssayQuizzes)
                 {
-                    Console.WriteLine(quiz.info() + " difficulty level: " + quiz.getDifficultyLevel());
+                    int sum = 0;
+                    int count = 0;
+                    foreach(Question q in quiz.Questions)
+                    {
+                        sum += q.Keywords.Length;
+                        count ++;
+                    }
+                    if (count == 0)
+                    {
+                        count = 1;
+                    }
+                    Console.WriteLine(quiz.info() + ", difficulty level: " + quiz.getDifficultyLevel(sum / count));
                 }
             }
 
             public void viewStudentGrades()
             {
-                foreach (Student s in Students)
+                foreach (Grade g in Grades)
                 {
-                    Console.WriteLine($"{s.getName()} ({s.getStudentID()}): {s.getGrade()}");
+                    Console.WriteLine($"Student ID: {g.getStudentID()}, {g.getStudentName()} scored {g.getMark()} out of {g.getFullMark()} in {g.getQuizTopic()}.");
                 }
             }
         }
@@ -362,7 +438,7 @@ namespace project
             QuizManager manager = new QuizManager();
             while (true)
             {
-                Console.WriteLine("Quiz Management System");
+                Console.WriteLine("---Quiz Management System---");
                 Console.WriteLine("1. Create Quiz");
                 Console.WriteLine("2. Add Question to Quiz");
                 Console.WriteLine("3. Grade Quiz");
