@@ -10,7 +10,7 @@ namespace project
 {
     class Program
     {
-        public static string checkForNull(string input)
+        public static string checkForNull(string input) 
         {
             while (string.IsNullOrWhiteSpace(input) || input == "Not provided")
             {
@@ -285,8 +285,15 @@ namespace project
                     {
                         if (quiz.getQuizID() == ID)
                         {
-                            quiz.addQuestion();
-                            Console.WriteLine("Question was added successfully.");
+                            Console.Write("Enter the number of questions you want to add: ");
+                            int number;
+                            int.TryParse(Console.ReadLine(), out number);
+                            for (int i = 1; i <= number; i++)
+                            {
+                                Console.WriteLine($"For question number {i}: ");
+                                quiz.addQuestion();
+                                Console.WriteLine($"Question {i} was added successfully.");
+                            }
                             return;
                         }
                     }
@@ -440,7 +447,7 @@ namespace project
             {
                 Console.WriteLine("---Quiz Management System---");
                 Console.WriteLine("1. Create Quiz");
-                Console.WriteLine("2. Add Question to Quiz");
+                Console.WriteLine("2. Add Questions to Quiz");
                 Console.WriteLine("3. Grade Quiz");
                 Console.WriteLine("4. View Quizzes");
                 Console.WriteLine("5. View Student Grades");
