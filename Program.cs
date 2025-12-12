@@ -21,11 +21,11 @@ namespace project
         }
         class Question
         {
-            public string Text;
-            public string [] Choices;
-            public string CorrectChoice;
-            public string [] Keywords;
-            public string Type;
+            private string Text;
+            private string [] Choices;
+            private string CorrectChoice;
+            private string [] Keywords;
+            private string Type;
             public Question(string _Text, string[] _Choices, string _CorrectChoice, string [] _Keywords, string _Type)
             {
                 Text = _Text;
@@ -34,13 +34,33 @@ namespace project
                 Keywords = _Keywords;
                 Type = _Type;
             }
+            public string getQuestionText()
+            {
+                return Text;
+            }
+            public string [] getChoices()
+            {
+                return Choices;
+            }
+            public string getCorrectChoice()
+            {
+                return CorrectChoice;
+            }
+            public string [] getKeywords()
+            {
+                return Keywords;
+            }
+            public string getType()
+            {
+                return Type;
+            }
         }
         class Quiz
         {
             public List<Question> Questions = new List<Question>();
-            protected string id;
-            protected string topic;
-            protected string difficultylevel = "Not determined yet";
+            private string id;
+            private string topic;
+            private string difficultylevel = "Not determined yet";
             
             public Quiz(string _id, string _topic)
             {
@@ -70,7 +90,7 @@ namespace project
         class MultipleChoiceQuiz : Quiz
         {
             public MultipleChoiceQuiz(string _id, string _topic) : base(_id, _topic) {}
-            public string [] choices_arr = Array.Empty<string>();
+            private string [] choices_arr = Array.Empty<string>();
             public void addQuestion()
             {
                 Console.Write("Enter question text: ");
@@ -78,8 +98,13 @@ namespace project
                 questionText = Program.checkForNull(questionText);
 
                 int choices_num;
-                Console.Write("Enter number of choices: ");
+                Console.Write("Enter number of choices (2 - 6): ");
                 int.TryParse(Console.ReadLine(), out choices_num);
+                while (choices_num <= 1 || choices_num >= 7)
+                {
+                    Console.Write("You must enter a value between (2 - 6) try again: ");
+                    int.TryParse(Console.ReadLine(), out choices_num);                    
+                }
 
                 Console.Write("Enter answer choices (seperated by commas): ");
                 string choices_str = Console.ReadLine() ?? "Not provided"; 
@@ -136,7 +161,7 @@ namespace project
         class EssayQuiz : Quiz
         {
             public EssayQuiz(string _id, string _topic) : base(_id, _topic) {}
-            public string [] keywords_arr = Array.Empty<string>();
+            private string [] keywords_arr = Array.Empty<string>();
             public void addQuestion()
             {
                 Console.Write("Enter question text: ");
@@ -169,9 +194,9 @@ namespace project
 
         class Student
         {
-            public string id;
-            public string name;
-            public int grade;
+            private string id;
+            private string name;
+            private int grade;
             public string getStudentID()
             {
                 return id;
@@ -194,11 +219,11 @@ namespace project
 
         class Grade
         {
-            public string studentName;
-            public string studentID;
-            public string quizTopic;
-            public int mark;
-            public int fullMark;
+            private string studentName;
+            private string studentID;
+            private string quizTopic;
+            private int mark;
+            private int fullMark;
             public string getStudentName()
             {
                 return studentName;
@@ -305,8 +330,15 @@ namespace project
                     {
                         if (quiz.getQuizID() == ID)
                         {
-                            quiz.addQuestion();
-                            Console.WriteLine("Question was added successfully.");
+                            Console.Write("Enter the number of questions you want to add: ");
+                            int number;
+                            int.TryParse(Console.ReadLine(), out number);
+                            for (int i = 1; i <= number; i++)
+                            {
+                                Console.WriteLine($"For question number {i}: ");
+                                quiz.addQuestion();
+                                Console.WriteLine($"Question {i} was added successfully.");
+                            }
                             return;
                         }
                     }
@@ -351,7 +383,7 @@ namespace project
                                 i++;
                                 string answer = Console.ReadLine() ?? "Not provided";
                                 answer = Program.checkForNull(answer);
-                                if (answer == q.CorrectChoice)
+                                if (answer == q.getCorrectChoice())
                                 {
                                     mark++;
                                 }
@@ -375,7 +407,7 @@ namespace project
                                 i++;
                                 string answer = Console.ReadLine() ?? "Not provided";
                                 answer = checkForNull(answer);
-                                foreach (string keyword in q.Keywords)
+                                foreach (string keyword in q.getKeywords())
                                 {
                                     string pattern = keyword;
                                     int count = Regex.Matches(answer, pattern, RegexOptions.IgnoreCase).Count;
@@ -406,7 +438,7 @@ namespace project
                     int count = 0;
                     foreach(Question q in quiz.Questions)
                     {
-                        sum += q.Choices.Length;
+                        sum += q.getChoices().Length;
                         count ++;
                     }
                     if (count == 0)
@@ -421,7 +453,7 @@ namespace project
                     int count = 0;
                     foreach(Question q in quiz.Questions)
                     {
-                        sum += q.Keywords.Length;
+                        sum += q.getKeywords().Length;
                         count ++;
                     }
                     if (count == 0)
