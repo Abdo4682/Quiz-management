@@ -274,17 +274,52 @@ namespace project
                 string topic = Console.ReadLine() ?? "Not provided";
                 topic = Program.checkForNull(topic);
 
-                if (type.ToLower() == "mcq")
-                {
-                    McqQuizzes.Add(new MultipleChoiceQuiz(ID, topic));
-                    Console.WriteLine("Quiz was created successfully.");
-                }
-                else if (type.ToLower() == "essay")
-                {
-                    EssayQuizzes.Add(new EssayQuiz(ID, topic));
-                    Console.WriteLine("Quiz was created successfully.");
-                }
+if (type.ToLower() == "mcq")
+{
+    bool exists = true;
+
+    while (exists)
+    {
+        exists = false;
+        foreach (MultipleChoiceQuiz quiz in McqQuizzes)
+        {
+            if (quiz.getQuizID() == ID)
+            {
+                exists = true;
+                Console.Write("Quiz ID already exists, enter another ID: ");
+                ID = Console.ReadLine() ?? "Not provided";
+                ID = Program.checkForNull(ID);
+                break;
             }
+        }
+    }
+
+    McqQuizzes.Add(new MultipleChoiceQuiz(ID, topic));
+    Console.WriteLine("Quiz was created successfully.");
+}
+else if (type.ToLower() == "essay")
+{
+    bool exists = true;
+
+    while (exists)
+    {
+        exists = false;
+        foreach (EssayQuiz quiz in EssayQuizzes)
+        {
+            if (quiz.getQuizID() == ID)
+            {
+                exists = true;
+                Console.Write("Quiz ID already exists, enter another ID: ");
+                ID = Console.ReadLine() ?? "Not provided";
+                ID = Program.checkForNull(ID);
+                break;
+            }
+        }
+    }
+
+    EssayQuizzes.Add(new EssayQuiz(ID, topic));
+    Console.WriteLine("Quiz was created successfully.");
+}
 
             public void addQuestionToQuiz()
             {
