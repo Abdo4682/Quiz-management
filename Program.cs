@@ -104,13 +104,13 @@ namespace project
 
                 Console.Write("Enter answer choices (seperated by commas): ");
                 string choices_str = Console.ReadLine() ?? "Not provided"; 
-                choices_arr = choices_str.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).ToArray();
+                choices_arr = choices_str.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).ToArray();
 
                 while (choices_arr.Length != choices_num)
                 {
                     Console.Write($"number of choices != {choices_num} \nEnter choices again (seperated by commas):");
                     choices_str = Console.ReadLine() ?? "Not provided";
-                    choices_arr = choices_str.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).ToArray();
+                    choices_arr = choices_str.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).ToArray();
                 }
 
                 Console.Write("Enter the correct choice: ");
@@ -168,7 +168,7 @@ namespace project
                 string keywords_str = Console.ReadLine() ?? "Not provided";
                 keywords_str = Program.checkForNull(keywords_str);
 
-                keywords_arr = keywords_str.Split(",").Select(c => c.Trim()).ToArray();  
+                keywords_arr = keywords_str.Split(',').Select(c => c.Trim()).ToArray();  
                 Questions.Add(new Question(questionText, Array.Empty<string>(), string.Empty, keywords_arr, "essay"));            
             }
             public override string getDifficultyLevel(int avg_keywords_num)
